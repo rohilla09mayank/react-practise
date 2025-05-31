@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
+import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
 
 // refs search enter key
 
@@ -11,15 +13,16 @@ const average = (arr) =>
 
 export default function App() {
   const [query, setQuery] = useState("");
-  const [watched, setWatched] = useState(() => {
-    const stored = localStorage.getItem("watched");
-    console.log(stored);
-    return JSON.parse(stored) || [];
-  });
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { movies, isLoading, error } = useMovies(query);
   const [selectedID, setSelectedID] = useState(null);
+
+  const [watched, setWatched] = useLocalStorageState("watched");
+
+  // const [watched, setWatched] = useState(() => {
+  //   const stored = localStorage.getItem("watched");
+  //   console.log(stored);
+  //   return JSON.parse(stored) || [];
+  // });
 
   function handleSelectID(id) {
     if (id === selectedID) {
@@ -42,53 +45,53 @@ export default function App() {
     setWatched((curr) => curr.filter((movie) => movie.id !== id));
   }
 
-  useEffect(
-    function () {
-      async function fetchMovies() {
-        const controller = new AbortController();
-        try {
-          setIsLoading(true);
-          setError("");
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${APIKEY}&s=${query}`,
-            { signal: controller.signal }
-          );
-          if (!res.ok)
-            throw new Error("Unable to fetch data. Something went wrong.");
-          const data = await res.json();
-          if (data.Response === "False") throw new Error(data.Error);
-          setMovies(data.Search);
-          setError("");
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            setError(err.message);
-          }
-        } finally {
-          setIsLoading(false);
-        }
+  // useEffect(
+  //   function () {
+  //     async function fetchMovies() {
+  //       const controller = new AbortController();
+  //       try {
+  //         setIsLoading(true);
+  //         setError("");
+  //         const res = await fetch(
+  //           `http://www.omdbapi.com/?apikey=${APIKEY}&s=${query}`,
+  //           { signal: controller.signal }
+  //         );
+  //         if (!res.ok)
+  //           throw new Error("Unable to fetch data. Something went wrong.");
+  //         const data = await res.json();
+  //         if (data.Response === "False") throw new Error(data.Error);
+  //         setMovies(data.Search);
+  //         setError("");
+  //       } catch (err) {
+  //         if (err.name !== "AbortError") {
+  //           setError(err.message);
+  //         }
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
 
-        return function () {
-          controller.abort();
-        };
-      }
+  //       return function () {
+  //         controller.abort();
+  //       };
+  //     }
 
-      if (query.length < 3) {
-        setError("");
-        setMovies([]);
-        return;
-      }
+  //     if (query.length < 3) {
+  //       setError("");
+  //       setMovies([]);
+  //       return;
+  //     }
 
-      fetchMovies();
-    },
-    [query]
-  );
+  //     fetchMovies();
+  //   },
+  //   [query]
+  // );
 
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
+  // useEffect(
+  //   function () {
+  //     localStorage.setItem("watched", JSON.stringify(watched));
+  //   },
+  //   [watched]
+  // );
 
   return (
     <>
