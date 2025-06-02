@@ -1,23 +1,37 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Homepage from "./pages/Homepage";
-import Products from "./pages/Products";
-import Pricing from "./pages/Pricing";
-import NotFound from "./pages/NotFound";
-import AppLayout from "./pages/AppLayout";
+
 import CityList from "./components/MainApp/Elements/CityList";
 import City from "./components/MainApp/Elements/City";
 import Form from "./components/MainApp/Elements/Form";
 import CountryList from "./components/MainApp/Elements/CountryList";
+import SpinnerFullPage from "./components/UI/SpinnerFullPage";
+
 import { CitiesProvider } from "./contexts/CitiesContext";
 import { AuthProvider } from "./contexts/FakeAuthContext";
-import Login from "./pages/Login";
+
 import ProtectedRoute from "./pages/ProtectedRoute";
+
+// import Homepage from "./pages/Homepage";
+// import Products from "./pages/Products";
+// import Pricing from "./pages/Pricing";
+// import NotFound from "./pages/NotFound";
+// import AppLayout from "./pages/AppLayout";
+// import Login from "./pages/Login";
+
+const Homepage = lazy(() => import("./pages/Homepage"));
+const Products = lazy(() => import("./pages/Products"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const PageNotFound = lazy(() => import("./pages/PageNotFound"));
+const AppLayout = lazy(() => import("./pages/AppLayout"));
+const Login = lazy(() => import("./pages/Login"));
 
 function App() {
   return (
     <CitiesProvider>
       <AuthProvider>
         <BrowserRouter>
+          <Suspense fallback={<SpinnerFullPage />}></Suspense>
           <Routes>
             <Route index element={<Homepage />} />
             <Route path="login" element={<Login />} />
@@ -37,7 +51,7 @@ function App() {
               <Route path="countries" element={<CountryList />} />
               <Route path="form" element={<Form />} />
             </Route>
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
